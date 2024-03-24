@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Importe os estilos do Bootstrap
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const App = () => {
+const Cliente = () => {
   const [formData, setFormData] = useState({
     nome: '',
     dataNascimento: '',
@@ -131,4 +131,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Cliente;

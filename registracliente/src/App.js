@@ -1,16 +1,23 @@
-import React from 'react';
-import { Route } from 'react-router-dom';
+// App.js
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Clients from './clientes';
 import Products from './produtos';
 import Home from './home';
+import Login from './login';
 
 const App = () => {
+  const [userFullName, setUserFullName] = useState(localStorage.getItem('userFullName') || '');
+
   return (
-    <div>
-      <Route exact path="/" component={Home} />
-      <Route path="/clientes" component={Clients} />
-      <Route path="/produtos" component={Products} />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login setUserFullName={setUserFullName} />} />
+        <Route path="/home" element={<Home userFullName={userFullName} />} />
+        <Route path="/clientes" element={<Clients />} />
+        <Route path="/produtos" element={<Products />} />
+      </Routes>
+    </Router>
   );
 };
 
