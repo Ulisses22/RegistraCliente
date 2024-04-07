@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { NavLink } from 'react-router-dom';
 
 const CadastroProduto = () => {
   const [produtos, setProdutos] = useState([]);
@@ -140,6 +141,9 @@ const CadastroProduto = () => {
 
   return (
     <div className="container mt-4">
+      <NavLink to="/home" className="btn btn-primary m-1 mr-2">
+        Voltar
+      </NavLink>
       <div className="row">
         <div className="col">
           <h2>{isEditing ? 'Editar Produto' : 'Cadastro de Produto'}</h2>

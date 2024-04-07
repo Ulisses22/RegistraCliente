@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { NavLink } from 'react-router-dom';
 
 const Cliente = () => {
   const [clientes, setClientes] = useState([]);
@@ -55,7 +56,7 @@ const Cliente = () => {
           },
           body: JSON.stringify(formData),
         });
-  
+
         if (response.ok) {
           await fetchClientes();
           setIsEditing(false);
@@ -77,7 +78,7 @@ const Cliente = () => {
           },
           body: JSON.stringify(formData),
         });
-  
+
         if (response.ok) {
           await fetchClientes();
           Swal.fire({
@@ -102,7 +103,7 @@ const Cliente = () => {
   };
 
   const handleEdit = (cliente) => {
-    setFormData({...cliente});
+    setFormData({ ...cliente });
     setIsEditing(true);
     setEditingClientId(cliente.id);
   };
@@ -137,10 +138,13 @@ const Cliente = () => {
 
   return (
     <div className="container mt-4 w-100">
+      <NavLink to="/home" className="btn btn-primary m-1 mr-2">
+        Voltar
+      </NavLink>
       <div className="row">
         <div className="col">
-          <h2>Cadastro de Clientes</h2>
-        <form onSubmit={handleSubmit}>
+          {/* <h2>Cadastro de Clientes</h2> */}
+          <form onSubmit={handleSubmit}>
             <h2>{isEditing ? 'Editar Cliente' : 'Cadastro de Cliente'}</h2>
             <div className="form-group">
               <label>*Nome completo:</label>
