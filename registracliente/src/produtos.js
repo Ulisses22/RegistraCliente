@@ -15,6 +15,7 @@ const CadastroProduto = () => {
     precoCusto: '',
     precoVenda: '',
   });
+  const [isEditing, setIsEditing] = useState(false); // Estado para controlar se está em modo de edição
 
   useEffect(() => {
     fetchProdutos();
@@ -52,8 +53,11 @@ const CadastroProduto = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:3001/produto', {
-        method: 'POST',
+      const url = isEditing ? `http://localhost:3001/produto/${formData.id}` : 'http://localhost:3001/produto';
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -65,7 +69,7 @@ const CadastroProduto = () => {
         Swal.fire({
           icon: 'success',
           title: 'Sucesso',
-          text: 'Produto cadastrado com sucesso',
+          text: isEditing ? 'Produto atualizado com sucesso' : 'Produto cadastrado com sucesso',
           toast: true,
         });
         setFormData({
@@ -79,6 +83,7 @@ const CadastroProduto = () => {
           precoCusto: '',
           precoVenda: '',
         });
+        setIsEditing(false); // Reset o modo de edição ao cadastrar
       } else {
         const errorData = await response.json();
         Swal.fire({
@@ -89,7 +94,41 @@ const CadastroProduto = () => {
         });
       }
     } catch (error) {
-      console.error('Erro ao criar produto:', error);
+      console.error('Erro ao criar/atualizar produto:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Erro',
+        text: 'Erro interno do servidor',
+        toast: true,
+      });
+    }
+  };
+
+  const handleEdit = (produto) => {
+    // Preenche o formulário com os dados do produto para edição
+    setFormData({ ...produto });
+    setIsEditing(true);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:3001/produto/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await fetchProdutos();
+        Swal.fire({
+          icon: 'success',
+          title: 'Sucesso',
+          text: 'Produto excluído com sucesso!',
+          toast: true,
+        });
+      } else {
+        throw new Error('Erro ao excluir produto');
+      }
+    } catch (error) {
+      console.error('Erro ao excluir produto:', error);
       Swal.fire({
         icon: 'error',
         title: 'Erro',
@@ -103,61 +142,57 @@ const CadastroProduto = () => {
     <div className="container mt-4">
       <div className="row">
         <div className="col">
-        <h2>Cadastro de Produto</h2>            
-            <form onSubmit={handleSubmit}>
-              <div className="row">
-
-                <div class="col-6">
-                  <label>Código:</label>
-                  <input type="text" name="codigo" value={formData.codigo} onChange={handleChange} className="form-control" required />
-                </div>
-                <div class="col-6">
-                  <label>Estoque:</label>
-                  <input type="text" name="estoque" value={formData.estoque} onChange={handleChange} className="form-control" required />
-                </div>
+          <h2>{isEditing ? 'Editar Produto' : 'Cadastro de Produto'}</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              <div className="col-6">
+                <label>Código:</label>
+                <input type="text" name="codigo" value={formData.codigo} onChange={handleChange} className="form-control" required disabled={isEditing} />
               </div>
-
-              <div className="row">
-                <div class="col-6">
-                  <label>Categoria:</label>
-                  <input type="text" name="categoria" value={formData.categoria} onChange={handleChange} className="form-control" required />
-                </div>
-                <div class="col-6">
-                  <label>Marca:</label>
-                  <input type="text" name="marca" value={formData.marca} onChange={handleChange} className="form-control" required />
-                </div>
-
+              <div className="col-6">
+                <label>Estoque:</label>
+                <input type="text" name="estoque" value={formData.estoque} onChange={handleChange} className="form-control" pattern="\d+" required />
               </div>
-              <div className="row">
-                <div class="col-6">
-                  <label>Modelo:</label>
-                  <input type="text" name="modelo" value={formData.modelo} onChange={handleChange} className="form-control" required />
-                </div>
-                <div class="col-6">
-                  <label>Unidade de medida:</label>
-                  <input type="text" name="unidadeMedida" value={formData.unidadeMedida} onChange={handleChange} className="form-control" required />
-                </div>
+            </div>
+            <div className="row">
+              <div className="col-6">
+                <label>Categoria:</label>
+                <input type="text" name="categoria" value={formData.categoria} onChange={handleChange} className="form-control" required />
               </div>
+              <div className="col-6">
+                <label>Marca:</label>
+                <input type="text" name="marca" value={formData.marca} onChange={handleChange} className="form-control" required />
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-6">
+                <label>Modelo:</label>
+                <input type="text" name="modelo" value={formData.modelo} onChange={handleChange} className="form-control" required />
+              </div>
+              <div className="col-6">
+                <label>Unidade de medida:</label>
+                <input type="text" name="unidadeMedida" value={formData.unidadeMedida} onChange={handleChange} className="form-control" required />
+              </div>
+            </div>
+            <div className="row d-flex">
+              <div className="col-6">
+                <label>Preço de venda:</label>
+                <input type="text" name="precoVenda" value={formData.precoVenda} onChange={handleChange} className="form-control" pattern="\d+(\.\d{1,2})?" required />
+              </div>
+              <div className="col-6">
+                <label>Preço de custo:</label>
+                <input type="text" name="precoCusto" value={formData.precoCusto} onChange={handleChange} className="form-control" pattern="\d+(\.\d{1,2})?" required />
+              </div>
+            </div>
+            <div className="row">
+              <div className="col">
+                <label>Descrição:</label>
+                <textarea rows="2" name="descricao" value={formData.descricao} onChange={handleChange} className="form-control" required></textarea>
+              </div>
+            </div>
 
-
-              <div className="row d-flex">
-                <div class="col-6">
-                  <label>Preço de venda:</label>
-                  <input type="text" name="precoVenda" value={formData.precoVenda} onChange={handleChange} className="form-control" required />
-                </div>
-                <div class="col-6">
-                  <label>Preço de custo:</label>
-                  <input type="text" name="precoCusto" value={formData.precoCusto} onChange={handleChange} className="form-control" required />
-                </div>
-              </div>
-              <div className="row">
-                <div class="col">
-                  <label>Descrição:</label>
-                  <textarea class="form-control" rows="2" name="descricao" value={formData.descricao} onChange={handleChange} className="form-control" required></textarea>
-                </div>
-              </div>
-              <button type="submit" className="btn btn-primary w-100 mt-2">Cadastrar</button>
-            </form>
+            <button type="submit" className="btn btn-primary w-100 mt-2">{isEditing ? 'Editar' : 'Cadastrar'}</button>
+          </form>
         </div>
         <div className="col">
           <h2>Lista de Produtos</h2>
@@ -189,15 +224,15 @@ const CadastroProduto = () => {
                   <td>{produto.precoCusto}</td>
                   <td>{produto.precoVenda}</td>
                   <td>
-                  <button type="button" class="btn btn-primary btn-sm mr-1">
-                    <span class="mr-1">Editar</span>
-                    <i class="fas fa-pencil-alt"></i>
-                  </button>
-                  <button type="button" class="btn btn-danger btn-sm">
-                    <span class="mr-1">Excluir</span>
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </td>
+                    <button type="button" className="btn btn-primary btn-sm mr-1" onClick={() => handleEdit(produto)}>
+                      <span className="mr-1">{isEditing ? 'Editar' : 'Editar'}</span>
+                      <i className="fas fa-pencil-alt"></i>
+                    </button>
+                    <button type="button" className="btn btn-danger btn-sm" onClick={() => handleDelete(produto.id)}>
+                      <span className="mr-1">Excluir</span>
+                      <i className="fas fa-trash"></i>
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

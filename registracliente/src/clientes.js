@@ -14,6 +14,8 @@ const Cliente = () => {
     telefone: '',
     email: '',
   });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingClientId, setEditingClientId] = useState(null);
 
   useEffect(() => {
     fetchClientes();
@@ -45,24 +47,48 @@ const Cliente = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:3001/cliente', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        await fetchClientes();
-        Swal.fire({
-          icon: 'success',
-          title: 'Sucesso',
-          text: 'Cliente cadastrado com sucesso!',
-          toast: true,
+      if (isEditing) {
+        const response = await fetch(`http://localhost:3001/cliente/${editingClientId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
         });
+  
+        if (response.ok) {
+          await fetchClientes();
+          setIsEditing(false);
+          setEditingClientId(null);
+          Swal.fire({
+            icon: 'success',
+            title: 'Sucesso',
+            text: 'Cliente atualizado com sucesso!',
+            toast: true,
+          });
+        } else {
+          throw new Error('Erro ao atualizar cliente');
+        }
       } else {
-        throw new Error('Erro ao cadastrar cliente');
+        const response = await fetch('http://localhost:3001/cliente', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+  
+        if (response.ok) {
+          await fetchClientes();
+          Swal.fire({
+            icon: 'success',
+            title: 'Sucesso',
+            text: 'Cliente cadastrado com sucesso!',
+            toast: true,
+          });
+        } else {
+          throw new Error('Erro ao cadastrar cliente');
+        }
       }
     } catch (error) {
       console.error('Erro ao cadastrar cliente:', error);
@@ -73,6 +99,12 @@ const Cliente = () => {
         toast: true,
       });
     }
+  };
+
+  const handleEdit = (cliente) => {
+    setFormData({...cliente});
+    setIsEditing(true);
+    setEditingClientId(cliente.id);
   };
 
   const handleDelete = async (id) => {
@@ -109,7 +141,7 @@ const Cliente = () => {
         <div className="col">
           <h2>Cadastro de Clientes</h2>
         <form onSubmit={handleSubmit}>
-            <h2>Cadastro de Cliente</h2>
+            <h2>{isEditing ? 'Editar Cliente' : 'Cadastro de Cliente'}</h2>
             <div className="form-group">
               <label>*Nome completo:</label>
               <input type="text" name="nome" value={formData.nome} onChange={handleChange} className="form-control" />
@@ -146,7 +178,7 @@ const Cliente = () => {
               <label>*E-mail:</label>
               <input type="email" name="email" value={formData.email} onChange={handleChange} className="form-control" />
             </div>
-            <button type="submit" className="btn btn-primary mt-3 w-100">Cadastrar</button>
+            <button type="submit" className="btn btn-primary mt-3 w-100">{isEditing ? 'Salvar Edição' : 'Cadastrar'}</button>
           </form>
         </div>
         <div className="col">
@@ -177,7 +209,7 @@ const Cliente = () => {
                   <td>{cliente.telefone}</td>
                   <td>{cliente.email}</td>
                   <td>
-                    <button type="button" className="btn btn-primary btn-sm mr-1">
+                    <button type="button" className="btn btn-primary btn-sm mr-1" onClick={() => handleEdit(cliente)}>
                       <span className="mr-1">Editar</span>
                       <i className="fas fa-pencil-alt"></i>
                     </button>
